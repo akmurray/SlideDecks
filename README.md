@@ -1,7 +1,7 @@
 SlideDecks
 ==========
 
-SlideDecks for the conference and events that I've spoken at.
+SlideDecks for the conferences and events that I've spoken at.
 
 
 Bio: Aaron Murray knows Technology and Business, and brings the two together with passion and flare. He is currently the leader of all things tech at the massively successful Austin company Buildasign. He earned his bachelor's degree in Computer Science from California State University at Chico. 
