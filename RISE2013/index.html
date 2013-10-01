@@ -1,0 +1,1330 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <title> RISE </title>
+  <meta name="Author" content="Aaron K. Murray, @aaronkmurray, akmurray@gmail.com">
+  <meta name='props' content='platforming inspired by nihilogic.dk'>
+
+  <script src='jquery-1.9.1.js'></script>
+  <script src='jquery.storage.js'></script>
+
+
+<style>
+html, body, #background {overflow:hidden;font-family:monospace, "Courier New", courier;font-weight:bold;}
+
+
+#background {
+	width : 100%;
+	height : 100%;
+	position : absolute;
+	top : 0px;
+	left : 0px;
+	overflow-x : hidden;
+	z-index : -1;
+
+/*
+	background: #6898F8;
+	background: -moz-linear-gradient(-90deg, rgb(40,30,30), rgb(90,70,70));
+	background: -webkit-gradient(linear, left top, left bottom, from(rgb(40,30,30)), to(rgb(90,70,70)));
+*/
+}
+
+#background .level {
+	position : absolute;
+	bottom : -16px;
+	left : 0px;
+
+	height : 448px;
+	width : 3888px;
+	
+	/* 
+	height : 248px;
+	width : 3392px;
+	background-image : url(mariobackground.png); */
+/*	overflow-x : hidden;*/
+}
+
+#background .overlay {
+	width : 3888px;
+	height : 100%;
+	position : absolute;
+	top : 0px;
+	left : 0px;
+	background-color : rgba(50,40,20,0.5);
+}
+
+#background .toon-sprite {
+	width : 18px;
+	height : 17px;
+	overflow : hidden;
+	position : absolute;
+	left : -999px;
+}
+
+#background .slide-line {
+	position : absolute;
+	color:#333;
+}
+#background #slide-1-line-1 {
+	left : 32px;
+	bottom : 180px;
+}
+#background #slide-1-line-2 {
+	left : 32px;
+	bottom : 145px;
+}
+#background #slide-1-line-3 {
+	left : 79px;
+	bottom : 116px;
+}
+#background #slide-1-line-4 {
+	left : 128px;
+	bottom : 84px;
+}
+#background #slide-1-line-5 {
+	left : 4px;
+	bottom : 16px; /*16 = bottom row*/
+	color:#ccc;
+}
+
+#background #slide-last-line-1 {
+	right : 255px;
+	bottom : 180px;
+	color:#eee;
+}
+#background #slide-last-line-2 {
+	right : 232px;
+	bottom : 160px;
+	color:#ddd;
+}
+#background #slide-last-line-3 {
+	right : 232px;
+	bottom : 140px;
+	color:#ccc;
+}
+#background #slide-last-line-4 {
+	right : 232px;
+	bottom : 120px;
+	color:#bbb;
+}
+#background #slide-last-line-5 {
+	right : 232px;
+	bottom : 100px;
+	color:#aaa;
+}
+#background #slide-last-line-6 {
+	right : 232px;
+	bottom : 80px; 
+	color:#999;
+}
+#background #slide-last-line-7 {
+	right : 232px;
+	bottom : 60px; 
+	color:#888;
+}
+#background #slide-last-line-8 {
+	right : 232px;
+	bottom : 40px; 
+	color:#777;
+}
+#background #slide-last-line-9 {
+	right : 255px;
+	bottom : 20px; /*16 = bottom row*/
+	color:#606060;
+}
+
+.debug-collisionmap-block {
+	height:16px;
+	width:16px;
+	font-size:0.25em;
+	position:absolute;
+	overflow:hidden;
+	display:block;
+}
+.debug-collisionmap-block.value0 {
+}
+.debug-collisionmap-block.value1 {
+	background-color:red;
+	opacity:0.6;
+}
+.debug-collisionmap-block.value2 {
+	background-color:blue;
+	opacity:0.6;
+}
+.debug-collisionmap-block:hover {
+	background-color:yellow;
+	opacity:0.5;
+	cursor:crosshair;
+}
+.debug-collisionmap-block.value1:hover {
+	background-color:pink;
+}
+.debug-collisionmap-block.value2:hover {
+	background-color:lightblue;
+}
+
+.block {
+	position:absolute;
+}
+.sprite {
+	position:absolute;
+}
+
+.wrapper-textbox-theme0 {
+	border: solid 1px black;
+	background-color: #B3F3CC;
+	padding:2px;
+	font-family:"Courier New",courier;
+}
+.wrapper-textbox-theme1 {
+	border: solid 1px black;
+	background-color: #0860A8;
+	padding:2px;
+	font-family:"Courier New",courier;
+}
+
+</style>
+
+</head>
+
+
+
+ <body>
+	<div id='background'>
+		<div class='level'>
+			<div class='toon-sprite'></div>
+			<div id='slide-1-line-1' class='slide-line'>Startups Need Developers</div>
+			<div id='slide-1-line-2' class='slide-line'>(to Add Value - Not Code)</div>
+			<div id='slide-1-line-3' class='slide-line'>Aaron Murray</div>
+			<div id='slide-1-line-4' class='slide-line'>@aaronkmurray</div>
+			<div id='slide-1-line-5' class='slide-line'>RISE Austin, 2013 #RISEATX13</div>
+
+			<div id='slide-last-line-1' class='slide-line'>Thank you!</div>
+			<div id='slide-last-line-2' class='slide-line'>This @ github.com/akmurray <img src='icon-github-16.png'></div>
+			<div id='slide-last-line-3' class='slide-line'></div>
+			<div id='slide-last-line-4' class='slide-line'>linkedin.com/in/akmurray <img src='icon-linkedin-16.png'></div>
+			<div id='slide-last-line-5' class='slide-line'>aaron.murray@buildasign.com <img src='icon-email-16.png'></div>
+			<div id='slide-last-line-6' class='slide-line'>akmurray@gmail.com <img src='icon-email-16.png'></div>
+			<div id='slide-last-line-7' class='slide-line'>www.aaronkmurray.com <img src='icon-aaronkmurray-16.png'></div>
+			<div id='slide-last-line-8' class='slide-line'>@aaronkmurray <img src='icon-twitter-16.png'></div>
+			<div id='slide-last-line-9' class='slide-line'>RISE Austin, 2013 #RISEATX13</div>
+
+		</div>
+	</div>
+ </body>
+
+
+
+
+
+
+<script>
+var game = {};
+
+$(document).ready(function() {
+
+	game.isEditMode = false;
+
+	game.audio = {}; //namespace obj
+
+	var $background = $("#background");
+	var $level = $("#background .level");
+	var $toon = $("#background .level .toon-sprite");
+
+	//array of level objects. First el null on purpose. Index matches folder name in /level/# dir. Example: /level/1/
+	var levels = [null, 
+					{	themes:[
+							{name:'nes', backgroundColor:'#9CFCF0', toonSprites:["mario3sprite.png","luigi3sprite.png"], 
+								audio: [
+										 {key:'bg', filename:'bg.mp3', isLooping:false} 
+										,{key:'jump', filename:'sfx/smb3_jump.wav', isLooping:false}
+										,{key:'bump', filename:'sfx/smb3_bump.wav', isLooping:false}
+										,{key:'coin', filename:'sfx/smb3_coin.wav', isLooping:false}
+										,{key:'1up', filename:'sfx/smb3_1-up.wav', isLooping:false}
+										,{key:'breakbrickblock', filename:'sfx/smb3_break_brick_block.wav', isLooping:false}
+								]}, 
+							{name:'snes', backgroundColor:'#6898F8', toonSprites:["mario3sprite.png","luigi3sprite.png"], 
+								audio: [
+										 {key:'bg', filename:'bg.mp3', isLooping:false}
+										,{key:'jump', filename:'sfx/smas_jump.wav', isLooping:false}
+										,{key:'bump', filename:'sfx/smb3_bump.wav', isLooping:false}
+										,{key:'coin', filename:'sfx/smb3_coin.wav', isLooping:false}
+										,{key:'1up', filename:'sfx/smas_1up.wav', isLooping:false}
+										,{key:'breakbrickblock', filename:'sfx/smb3_break_brick_block.wav', isLooping:false}
+								]}
+						], 
+						startPos: [1,25]
+					},
+	]; 
+	
+	
+	game.collisionMaps = []; //array index is level #
+	//enable debug mode ( call game.debugOn() ) to modify the map
+	//values are: 0=no collision, 1=solid block, 2=block downward movement
+	//game.exportCollisionMap(true) will then print this line of code to the console...copy and paste it in here with the double quote wrapper
+	game.collisionMaps[1] = [[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[1,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[1,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[1,0,0,0,0,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[1,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,0,0,0,0,1,1,0,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,2,2,2,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,2,2,2,2,2,2,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,1,1,1,1,1,1,1,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]];
+
+
+	//when adding a new type, update the 3 'activated' arrays below and specialBlockActivated() function
+	game.blockMaps = [];//game.blockMaps is an array levels, each with array of subarrays. Each subarray element represents a block. Components are: [blockType, row, col]
+	game.blockMaps[1] = [
+					[1,23,43,false],[1,23,44,false],[1,20,46,false],[1,20,47,false],[1,21,58,false],[1,25,73,false],[1,23,76,false],[1,24,124,false],	//?
+					[2,21,99,false],[2,19,101,false],[2,17,103,false],[2,15,105,false],[2,13,107,false],[2,6,115,false],[2,6,116,false],[2,6,117,false],[2,8,124,false],[2,8,125,false],[2,9,128,false],[2,9,129,false],[2,9,130,false],[2,9,131,false],[2,8,133,false],[2,8,134,false],[2,8,135,false],[2,8,136,false],[2,10,138,false],[2,8,140,false],[2,9,142,false],[2,7,145,false],[2,9,147,false],	//coin
+					[3,9,122,false],[3,26,154,false],[3,25,155,false],[3,26,155,false],[3,24,156,false],[3,25,156,false],[3,26,156,false],[3,24,157,false],[3,25,157,false],[3,26,157,false],[3,24,158,false],[3,25,158,false],[3,26,158,false],[3,24,159,false],[3,25,159,false],[3,26,159,false],[3,26,160,false],[3,25,163,false],[3,26,163,false],[3,26,164,false],	//brick
+					//[4,23,159,false],	//P
+					[5,22,200,false],	//End-level Star/Flower/Mushroom
+					[6,8,122,false],	//1up
+					[7,23,26,false],		//music note
+	];
+	game.blockTypesActivatedFromAnyDir = [2,6];
+	game.blockTypesActivatedFromAbove = [4];
+	game.blockTypesActivatedFromBelow = [1,2,3,5,7];
+
+
+	var currentLevel = 1;
+	var currentThemeNum = 0;
+	var currentToonNum = 0;
+
+
+	game.loadSavedData = function() {
+		var savedMaps = $.localStorage('collisionMaps');	
+		if (savedMaps && savedMaps.length > 0)
+			game.collisionMaps = savedMaps;
+	};
+	game.loadSavedData();
+
+	game.getLevelThemePath = function(levelNum, themeNum) {
+		var level = (levelNum || currentLevel);
+		var theme = (themeNum || currentThemeNum);
+		var path = 'level/' + level + '/theme/' + levels[level].themes[theme].name + '/';
+		//log(path, levelNum, themeNum);
+		return path;
+	};
+
+
+	game.loadLevelBlockMap = function(levelNum, themeNum) {
+		var rows = game.collisionMaps[levelNum].length;
+		for (var i=0;i<game.blockMaps[levelNum].length;i++)
+		{
+			var block = game.blockMaps[levelNum][i];
+			if (!block)
+				continue;
+			var img = new Image();
+			img.src = game.getLevelThemePath(levelNum, themeNum) + 'icon-'+block[0]+'.gif';
+			img.className = 'block block-' + block[0] + ' block-r' + block[1] + 'c' + block[2];
+			img.blockType = block[0];
+			$(img).css("bottom",  (rows - block[1])*16).css("left", block[2]*16);
+			$level.append(img);
+		}
+	};
+
+	game.updateBlockSprites = function(levelNum, themeNum) {
+		var blockImgs = $('img.block');
+		for (var i=0;i<blockImgs.length;i++)
+		{
+			var img = blockImgs[i];
+			if (!isNaN(img.blockType))
+			{
+				img.src = game.getLevelThemePath(levelNum, themeNum) + 'icon-'+img.blockType+'.gif';
+			}
+		}
+	};
+	
+	var toonImg = new Image();
+	$toon.append(toonImg);
+
+	game.setToonSpriteSet = function(toonNum, levelNum, themeNum) {
+		//Set the current toon sprite tileset given an index to our possible character sprites in the toonSpriteSets array
+		var level = (levelNum || currentLevel);
+		var theme = (themeNum || currentThemeNum);
+		currentToonNum = toonNum;
+		toonImg.src = game.getLevelThemePath(level, theme) + levels[level].themes[theme].toonSprites[currentToonNum];
+	};
+
+
+	game.loadLevelBackground = function(levelNum, themeNum) {
+		$background.css('background-color', levels[levelNum].themes[themeNum].backgroundColor);
+		$level.css('background-image', 'url(\"' + game.getLevelThemePath(levelNum, themeNum) + 'bg.png\")');
+	};
+
+
+
+	
+
+	var pos = [];//will be set by level[1].startPos when level data is loaded  //[1,25]; //[8,game.collisionMaps[1].length - $(window).height()/16];
+	var vel = [0,0];
+	var velMax = [0.4,0.8];
+	var velMin = [-0.4,-0.85];
+	var toonDir = 0;
+	var onGround = false;
+	var toonFaceDir = 1;
+
+	var scrollPosX = 0;
+	var scrolling = false;
+	var scrollSpeed = 0;
+
+	var mouse = []; //array of objects - index represents a mouse button
+
+	var keyQueue = []; //ordered array of last X keypresses (for monitoring special 'code' sequences)
+	var keyQueueMax = 16; //max number of keypresses to watch for
+
+	var idleTime = 60000;
+	var lastActionTime;
+	
+	var _coins = 0;
+
+    game.audio.context = null;	//will be set in initAudio;
+	game.audio.sounds = {}; //key: soundKey string, value: object {buffer: AudioBuffer, gainNode: Gain} ... see playSound() && playBuffer()
+
+	function log() {
+		if (console && console.log)
+			console.log(arguments);
+	}
+	
+	game.setToonPosition = function(arrNewPos /*[col, row]*/) {
+		if (arguments.length == 2)
+			pos = [arguments[0],arguments[1]];
+		else
+			pos = arrNewPos;
+		$toon
+			.css("left", pos[0]*16)
+			.css("bottom", game.collisionMaps[currentLevel].length*16 - pos[1]*16)
+		;
+	};	
+
+	function checkIdle() {
+
+		return; //TODO
+
+		var now = new Date().getTime();
+		if (now - lastActionTime > idleTime) {
+			if (onGround) 
+				vel[1] = velMin[1];
+			lastActionTime = now;
+		}
+	}
+
+	function setToonImage(idx) {
+		$toon.scrollLeft((0+idx) + (idx*17)); //17 is 1 less than the frame width in the sprite
+	}
+
+	var spriteStates = {
+		JUMPLEFT1 : 0,
+		JUMPLEFT2 : 1,
+		RUNLEFT3 : 2,
+		RUNLEFT2 : 3,
+		RUNLEFT1 : 4,
+		STANDLEFT : 5,
+		STANDRIGHT : 6,
+		RUNRIGHT1 : 7,
+		RUNRIGHT2 : 8,
+		RUNRIGHT3 : 9,
+		JUMPRIGHT2 : 10,
+		JUMPRIGHT1: 11
+	}
+
+
+	function mainLoop() {
+		var velIncX = 0.05;
+		var walkCycleLoopLeft = [spriteStates.RUNLEFT1, spriteStates.STANDLEFT];
+		var walkCycleLoopRight = [spriteStates.RUNRIGHT1, spriteStates.STANDRIGHT];
+
+		if (toonDir) {
+			toonFaceDir = toonDir;
+			vel[0] += velIncX * toonDir;
+		} else {
+			vel[0] *= 0.8;
+			if (Math.abs(vel[0]) < 0.05) vel[0] = 0;
+		}
+
+		vel[1] += 0.08;
+		if (vel[0] > velMax[0]) vel[0] = velMax[0];
+		if (vel[0] < velMin[0]) vel[0] = velMin[0];
+		if (vel[1] > velMax[1]) vel[1] = velMax[1];
+		if (vel[1] < velMin[1]) vel[1] = velMin[1];
+
+		var newPos = [
+			pos[0] + vel[0],
+			pos[1] + vel[1]
+		];
+
+		if (onGround) {
+			if (vel[0] == 0) {
+				walkCycle = 0;
+				setToonImage(toonFaceDir < 0 ? spriteStates.STANDLEFT : spriteStates.STANDRIGHT);
+			} else {
+				walkCycle += 0.5;
+				if (walkCycle >= walkCycleLoopLeft.length) 
+					walkCycle = 0;
+				setToonImage(vel[0] < 0 ? walkCycleLoopLeft[Math.floor(walkCycle)] : walkCycleLoopRight[Math.floor(walkCycle)]);
+			}
+		} else {
+			walkCycle = 0;
+			setToonImage(toonFaceDir < 0 ? spriteStates.JUMPLEFT1 : spriteStates.JUMPRIGHT1);
+		}
+
+		pos = collide(pos, newPos);	
+
+		if (pos[0] != newPos[0]) vel[0] = 0;
+		if (pos[1] != newPos[1]) vel[1] = 0;
+
+		//$(window).width()/16 is the number of columns showing
+		var winColsShowing = $(window).width()/16;
+
+		if (pos[1] > game.collisionMaps[currentLevel].length) 
+			pos[1] = game.collisionMaps[currentLevel].length - winColsShowing;
+
+		//scrollPosX/16 is the column that we are showing on screen
+		var curScrollCol = scrollPosX/16;
+		if (toonFaceDir > 0 && pos[0] > winColsShowing - (winColsShowing/2) + curScrollCol)
+			initScroll(1);
+		else if (toonFaceDir < 0 && pos[0] < (winColsShowing/4) + curScrollCol)
+			initScroll(-1);
+
+		$toon
+			.css("left", pos[0]*16)
+			.css("bottom", game.collisionMaps[currentLevel].length*16 - pos[1]*16)
+		;
+	}
+
+	function initScroll(dir) {
+		scrollSpeed = dir;
+		if (scrolling) return;
+		scrolling = true;
+		scroll();
+	}
+
+	function scroll() {
+		$background.scrollLeft(scrollPosX + ($(window).width()/16/2) * scrollSpeed);
+		scrollSpeed *= 0.93; //0.92 is good. 0.99 leaves toon off the screen. 0.95 is a max
+
+		scrollPosX = $background.scrollLeft();
+		if (Math.abs(scrollSpeed) > 0.1)
+			setTimeout(scroll, 1000 / 20); //1000 / 15
+		else
+			scrolling = false;
+
+	}
+
+
+
+	function collide(pos1, pos2) {
+		var oldX = pos1[0];
+		var oldY = pos1[1];
+		var newX = pos2[0];
+		var newY = pos2[1];
+
+		var collision, xAdjust = 0;
+
+		var space = 1/16;
+
+		onGround = false;
+
+		if (oldY != newY) { // moving vertically
+			if (newY > oldY) { // moving down
+				// lower left collision
+
+				var checkForSpecialBlockHit = false;
+
+				collision = isBlocking(newX + space, newY + 1,[]);
+				if (collision && !isBlocking(newX + space, newY,[])) {
+					newY -= collision[1];
+					onGround = true;
+					checkForSpecialBlockHit = true;
+				}
+
+				var collisionData = collision;
+
+				// lower right collision
+				collision = isBlocking(newX + 1-space, newY + 1,[]);
+				if (collision && !isBlocking(newX + 1-space, newY,[])) {
+					newY -= collision[1];
+					onGround = true;
+					checkForSpecialBlockHit = true;
+					collisionData = collision;
+				}
+			
+
+				//TODO for game.blockTypesActivatedFromAbove = [4];
+
+			} else { 
+				// moving up
+				var checkForSpecialBlockHit = false;
+
+				// upper left collision
+				collision = isBlocking(newX + space, newY,[2]);
+				if (collision && !isBlocking(newX + space, newY + 1,[2])) {
+					newY += (1 - collision[1]);
+					checkForSpecialBlockHit = true;
+				}
+
+				var collisionData = collision;
+				// upper right collision
+				collision = isBlocking(newX + 1 - space, newY,[2]);
+				if (collision && !isBlocking(newX + 1 - space, newY + 1,[2])) {
+					newY += (1 - collision[1]);
+					xAdjust = 1;
+					checkForSpecialBlockHit = true;
+					collisionData = collision;
+				}
+
+				if (checkForSpecialBlockHit) {
+					//log('checkForSpecialBlockHit', collisionData);
+					//collisionData[3] is abs column
+					//collisionData[4] is abs row
+
+					for (var bm = 0; bm < game.blockMaps[currentLevel].length; bm++) {
+						var blockData = game.blockMaps[currentLevel][bm];
+						if (!blockData || $.inArray(blockData[0], game.blockTypesActivatedFromBelow) < 0)
+							continue;
+						if (blockData[1] == collisionData[4] && blockData[2] == collisionData[3])
+						{
+							if (blockData[3]) {
+								//disabled
+								game.audio.playSfx('bump');
+							} else {
+								//type and row and col match and not disabled - take action on this block type/location: 
+								var result = game.specialBlockActivated(blockData);
+								blockData[3] = result.isDisabled;
+								break;
+							}
+						}
+					}
+				}
+			}
+
+		}
+		// moving horizontally
+		if (oldX != newX) {
+
+			// moving right
+			if (newX > oldX) {
+
+				// lower right collision
+				collision = isBlocking(newX + 1, newY + 1-space, [2]);
+				if (collision) {
+					newX -= collision[0];
+				}
+
+				// upper right collision
+				collision = isBlocking(newX + 1, newY, [2]);
+				if (collision) {
+					newX -= collision[0];
+				}
+
+				//TODO for
+			
+			} else { 
+				// moving left
+
+				// lower left collision
+				collision = isBlocking(newX, newY + 1-space, [2]);
+				if (collision) {
+					newX += (1 - collision[0]);
+				}
+
+				// upper left collision
+				collision = isBlocking(newX, newY, [2]);
+				if (collision) {
+					newX += (1 - collision[0]);
+				}
+
+				//TODO for
+
+			}
+		}
+
+		var posToCheck = [];
+		posToCheck.push([pos2[1],pos2[0]]);
+		posToCheck.push([pos2[1]-0.5,pos2[0]-0.5]);
+		posToCheck.push([pos2[1]+0.5,pos2[0]+0.5]);
+
+		for(var i=0;i<posToCheck.length;i++) {
+			var currentSpecialBlock = game.getActiveSpecialBlockAtLocation(posToCheck[i][0] /*row*/,  posToCheck[i][1] /*col*/);
+			//game.blockTypesActivatedFromAnyDir = [2,6];
+			if (currentSpecialBlock != null && $.inArray(currentSpecialBlock[0], game.blockTypesActivatedFromAnyDir) >= 0)
+			{
+				var result = game.specialBlockActivated(currentSpecialBlock);
+				currentSpecialBlock[3] = result.isDisabled;
+				break;
+			}
+		}
+
+
+		return [newX,newY,xAdjust];
+	}
+
+	// check if a tile is a blocking tile
+	function isBlocking(x, y, arrNonBlockingTypes) {
+		var tx = x>>0;
+		var ty = y>>0;
+
+		if (!game.collisionMaps[currentLevel][ty])
+			return false; //undefined top or bottom of level
+
+		var blockType = game.collisionMaps[currentLevel][ty][tx];
+		if (typeof blockType == "undefined" || blockType > 0) {
+			if ($.inArray(blockType, arrNonBlockingTypes) < 0) {
+				return [x - tx, y - ty, blockType, tx, ty];
+			}
+		}
+		return false;
+	}
+
+	game.getActiveSpecialBlockAtLocation = function(row, col) {
+		//if (vel[0] != 0 || vel[1] != 0.08)
+		//	log('game.getActiveSpecialBlockAtLocation', row, col, row>>0, col>>0, Math.round(row), Math.round(col), vel[0], vel[1]);
+
+		row = Math.round(row);
+		col = Math.round(col);
+
+		for (var bm = 0; bm < game.blockMaps[currentLevel].length; bm++) {
+			var blockData = game.blockMaps[currentLevel][bm];
+			if (!blockData)
+				continue;
+			if (blockData[1] == row && blockData[2] == col)
+			{
+				if (!blockData[3]) {
+					return blockData;
+				}
+			}
+		}
+		return null;
+	};
+
+	game.specialBlockActivated = function(blockData) {
+		log('specialBlockActivated', blockData);
+		var type = blockData[0];
+		var row = blockData[1];
+		var col = blockData[2];
+		var isDisabled = blockData[3];
+
+		switch (type) {
+			case 1:		//?
+				//TODO 
+				isDisabled = true;
+				_coins++;
+				game.audio.playSfx('coin');
+				break;
+			case 2:		//coin
+				//TODO remove sprite and add to inventory 
+				game.audio.playSfx('coin');
+				isDisabled = true;
+				$('.block-r'+row+'c'+col).remove();
+				break;
+			case 3:		//brick
+				//TODO break
+
+				game.audio.playSfx('breakbrickblock');
+				break;
+			case 4:		//P
+				//TODO 
+
+				break;
+			case 5:		//card: End-level Star/Flower/Mushroom
+				//TODO 
+
+				break;
+			case 6:		//1up
+				//TODO 
+				isDisabled = true;
+				game.audio.playSfx('1up');
+				$('.block-r'+row+'c'+col).remove();
+				break;
+			case 7:		//music note
+				//TODO play level intro music and setTimeout for bg
+				game.audio.toggleBgMusic();
+				break;
+			default:
+				log('unknown special block hit: ' + type);
+		}
+		return {isDisabled: isDisabled};
+	};
+
+
+	game.debugOn = function() {
+		game.isEditMode = true;
+		game.renderCollisionMap();
+	};
+
+	game.debugOff = function() {
+		game.isEditMode = false;
+		$(".js-debug-collisionmap-block").remove();
+	};
+
+	game.renderCollisionMap = function() {
+		$(".js-debug-collisionmap-block").remove();
+		var container = $("#background .level");
+		
+		var rowMax = game.collisionMaps[currentLevel].length - 1;
+		for (var r=rowMax; r >= 0; r--) //render from bottom up
+		{
+			for (var c=0, cl = game.collisionMaps[currentLevel][r].length; c < cl; c++)
+			{
+				var div = $("<span class='js-debug-collisionmap-block debug-collisionmap-block value"+game.collisionMaps[currentLevel][r][c]+"'>"+r+","+c+"</span>")
+					.css("left", c*16)
+					.css("bottom", (rowMax - r + 1)*16);
+				container.append(div);
+			}
+		}
+	};
+
+	game.exportCollisionMap = function(saveChanges) {
+		if (saveChanges)
+			game.saveChanges(true);
+	
+		var rowCount = game.collisionMaps[currentLevel].length;
+		var s = 'game.collisionMaps['+currentLevel+'] = [';
+		for (var r=0;r<rowCount;r++)
+		{
+			if (r > 0)
+				s += ',';
+			s += '[' + game.collisionMaps[currentLevel][r].toString() + ']';
+		}
+		s += '];'
+		log(s);
+
+	};
+
+	game.extendCollisionMap = function(colsLeft, colsRight, rowsTop, rowsBottom) {
+		colsLeft = isNaN(colsLeft) ? 0 : parseInt(colsLeft,10);
+		colsRight = isNaN(colsRight) ? 0 : parseInt(colsRight,10);
+		rowsTop = isNaN(rowsTop) ? 0 : parseInt(rowsTop,10);
+		rowsBottom = isNaN(rowsBottom) ? 0 : parseInt(rowsBottom,10);
+
+		log('extendCollisionMap', colsLeft, colsRight, rowsTop, rowsBottom);
+
+		if (colsLeft < 0) {
+			//remove cols from the start
+			log('TODO remove cols from the start');
+		} else if (colsLeft > 0) {
+			//add cols to the start
+			for (var r=0, rowMax=game.collisionMaps[currentLevel].length; r < rowMax; r++)
+				for (var i=0;i<colsLeft;i++)
+					game.collisionMaps[currentLevel][r].unshift(0);
+		} else {
+			log('TODO handle extending this combination');
+		}
+		
+	};
+
+	game.moveToonRight = function() {
+		lastActionTime = new Date().getTime();
+		toonDir = 1;
+	};
+
+	game.moveToonLeft = function() {
+		lastActionTime = new Date().getTime();
+		toonDir = -1;
+	};
+
+	game.moveToonJump = function() {
+		lastActionTime = new Date().getTime();
+		if (onGround) {
+			if (vel[1] != velMin[1])
+				game.audio.playSfx('jump'); //we're not already queueing a jump
+			vel[1] = velMin[1];
+		}
+	};
+
+	game.stopToon = function() {
+		lastActionTime = new Date().getTime();
+		toonDir = 0;
+	};
+
+	game.stopToonIfMovingInDir = function(dir) {
+		if (dir == toonDir)
+			game.stopToon();
+		else
+			lastActionTime = new Date().getTime();
+	};
+
+	game.changeTheme = function(themeNum, crossfadeBgMusic) {
+		var oldThemeNum = currentThemeNum;
+		crossfadeBgMusic = !!crossfadeBgMusic;
+
+		game.loadLevelBackground(currentLevel, themeNum);
+		game.updateBlockSprites(currentLevel, themeNum);
+		game.setToonSpriteSet(currentToonNum, currentLevel, themeNum);
+	
+		if (crossfadeBgMusic)
+			game.audio.crossFadeTracks(game.audio.getAudioKey('bg', currentLevel, oldThemeNum), game.audio.getAudioKey('bg', currentLevel, themeNum), 1.0) 
+
+	};
+
+	game.saveChanges = function(saveCollisionMaps) {
+		$.localStorage("toon-position", scrollPosX + "," + pos[0] + "," + pos[1]);
+		if(saveCollisionMap)
+			$.localStorage('collisionMaps', game.collisionMaps);
+	};
+
+	game.audio.getAudioKey = function(type, levelNum, themeNum) {
+		var level = (levelNum || currentLevel);
+		var theme = (themeNum || currentThemeNum);
+		return type + '_' + level + '_' + theme;
+	};
+
+	game.audio.loadSound = function(url, key, isLooping) {
+		//load a sound given a url
+		var request = new XMLHttpRequest();
+		request.open('GET', url, true);
+		request.responseType = 'arraybuffer';
+
+		game.audio.sounds[key] = {};
+		game.audio.sounds[key].isLoaded = false;
+		game.audio.sounds[key].loadStartedAt = new Date().getTime();
+		game.audio.sounds[key].isLooping = !!isLooping;
+		
+		// Decode asynchronously
+		request.onload = function() {
+			game.audio.context.decodeAudioData(request.response, function(buffer) {
+				//success
+				game.audio.sounds[key].buffer = buffer;
+				game.audio.sounds[key].isLoaded = true;
+				game.audio.sounds[key].loadStoppedAt = new Date().getTime();
+				game.audio.sounds[key].isError = false;
+				log('sound loaded', key, url, (game.audio.sounds[key].loadStoppedAt - game.audio.sounds[key].loadStartedAt) + 'ms');
+			}, function(err) {
+				//error
+				log('onAudioLoadError', key, url, err);
+				game.audio.sounds[key].loadStoppedAt = new Date().getTime();
+				game.audio.sounds[key].isError = true;
+			});
+		}
+		request.send();
+	};
+
+	game.audio.playSound = function(soundKey, gainVolume, startAtTime) {
+		var sound = game.audio.sounds[soundKey];
+		if (!sound || !sound.isLoaded)
+		{
+			log('game.audio.playSound cannot play ['+soundKey+'] because it is not loaded yet', sound);
+			return sound;
+		}
+
+		var result = game.audio.playBuffer(sound.buffer, sound.isLooping, gainVolume, startAtTime);
+		game.audio.sounds[soundKey].gainNode = result.gainNode;
+		game.audio.sounds[soundKey].source = result.source;
+		return game.audio.sounds[soundKey];
+	};
+
+	game.audio.playBuffer = function(buffer, isLooping, gainVolume, startAtTime) {
+		startAtTime = startAtTime || 0;
+		if (isNaN(gainVolume))
+			gainVolume = 1;
+
+		var source = game.audio.context.createBufferSource();	// creates a sound source
+		var gainNode = game.audio.context.createGain();			// create a gain node attached to the AudioContext
+		gainNode.connect(game.audio.context.destination);		// Connect gain to destination (speakers)
+		gainNode.gain.value = gainVolume;						// default volume
+
+		source.loop = !!isLooping;								// loops or not
+		source.buffer = buffer;									// tell the source which sound to play
+		source.connect(gainNode);								// connect the source to gain node so we can mess with the volume in advanced ways
+		source.start(startAtTime);								// play the source now, starting at the given time (or 0=beginning) ... // note: on older systems, may have to use deprecated noteOn(time);
+		
+		return { source: source, gainNode: gainNode };
+	};
+
+	game.audio.stopSound = function(soundKey) {
+		if (game.audio.sounds[soundKey] && game.audio.sounds[soundKey].source && game.audio.sounds[soundKey].source.playbackState == 2) {
+			//UNSCHEDULED_STATE (0), SCHEDULED_STATE (1), PLAYING_STATE (2), or FINISHED_STATE (3).
+			game.audio.sounds[soundKey].source.stop(game.audio.context.currentTime);
+			return true;
+		}
+		return false;
+	};
+
+	game.audio.isPlaying = function(soundKey) {
+		if (game.audio.sounds[soundKey] && game.audio.sounds[soundKey].source && game.audio.sounds[soundKey].source.playbackState == 2) {
+			return true;
+		}
+		return false;
+	};
+
+	game.audio.playSfx = function(nameKey, levelNum, themeNum) {
+		game.audio.playSound(game.audio.getAudioKey(nameKey, levelNum, themeNum));
+	};
+
+	game.audio.playBgMusic = function(levelNum, themeNum) {
+		game.audio.playSfx('bg',levelNum, themeNum);
+	};
+
+	game.audio.toggleBgMusic = function() {
+		var soundKey = game.audio.getAudioKey('bg');
+		if (game.audio.isPlaying(soundKey))
+			game.audio.stopSound(soundKey);
+		else
+			game.audio.playSound(soundKey);
+	};
+
+	game.audio.crossFadeTracks = function(audioKeyToStop, audioKeyToStart, fadeSeconds) {
+		var soundToStop  = game.audio.sounds[audioKeyToStop];
+		var soundToStart = game.audio.sounds[audioKeyToStart];
+		if (isNaN(fadeSeconds))
+			fadeSeconds = 1.0;
+
+		//fade current sound out
+		if (soundToStop.gainNode) {
+			soundToStop.gainNode.gain.linearRampToValueAtTime(1, game.audio.context.currentTime);
+			soundToStop.gainNode.gain.linearRampToValueAtTime(0, game.audio.context.currentTime + fadeSeconds);
+		}
+		if (soundToStop.source)
+			soundToStop.source.stop(game.audio.context.currentTime + fadeSeconds);
+
+		//start new sounds at 0 volume
+		soundToStart = game.audio.playSound(audioKeyToStart, 0);
+		soundToStart.gainNode.gain.linearRampToValueAtTime(0, game.audio.context.currentTime);
+		soundToStart.gainNode.gain.linearRampToValueAtTime(1, game.audio.context.currentTime + fadeSeconds);
+
+	};
+
+
+	game.renderTextBox = function(id, text, row, col, colWidth) {
+		$("#" + id).remove();
+
+		var rowMax = game.collisionMaps[currentLevel].length - 1;
+
+		var container = $("<div class='sprite js-wrapper-textbox wrapper-textbox wrapper-textbox-theme"+currentThemeNum+"' id='"+id+"'>"+text+"</div>")
+			.css('max-width', (colWidth * 16))
+			.css("left",   col*16)
+			.css("bottom", (rowMax - row + 1)*16);
+		;
+
+		/*
+		var container = $("<div class='sprite js-wrapper-textbox wrapper-textbox' id='"+id+"'></div>");
+
+		//TODO calc text & box size
+		//TODO draw border
+		//TODO draw text
+
+		var pxPerLetter = 8;
+		var pxPerBorder = 8;
+		var pxPerCol = 16;
+
+
+		var letterCount = text.length;
+		var textWidthPx = pxPerLetter * letterCount;
+		var maxPxPerLine = colWidth * 16;
+		var lines = Math.ceil(letterCount / maxPxPerLine);
+		var bordersWide = maxPxPerLine / pxPerBorder;
+		
+		var c = col;
+		var r = row;
+
+		//TL: TOP LEFT BORDER
+		var bordertl = $("<img class='sprite js-textbox-border' src='"+game.getLevelThemePath(currentLevel, currentThemeNum)+"box-tl.png' />")
+			.css("left",   c*16)
+			.css("bottom", (rowMax - r + 1)*16);
+		container.append(bordertl);
+
+		//T: TOP BORDER
+		for (var i=0;i<bordersWide;i++)
+		{
+			var border = $("<img class='sprite js-textbox-border' src='"+game.getLevelThemePath(currentLevel, currentThemeNum)+"box-t.png' />")
+				.css("left",   ((c*2) + 1 + i)*pxPerBorder)
+				.css("bottom", (rowMax - r + 1)*16);
+			container.append(border);
+		}
+
+		//TR: TOP RIGHT BORDER
+		var bordertr = $("<img class='sprite js-textbox-border' src='"+game.getLevelThemePath(currentLevel, currentThemeNum)+"box-tr.png' />")
+			.css("left",   (c + colWidth) * 16)
+			.css("bottom", (rowMax - r + 1) * 16);
+		container.append(bordertr);
+
+
+
+		for (var r=rowMax; r >= 0; r--) //render from bottom up
+		{
+			for (var c=0, cl = game.collisionMaps[currentLevel][r].length; c < cl; c++)
+			{
+				var div = $("<span class='js-debug-collisionmap-block debug-collisionmap-block value"+game.collisionMaps[currentLevel][r][c]+"'>"+r+","+c+"</span>")
+					.css("left", c*16)
+					.css("bottom", (rowMax - r + 1)*16);
+				//container.append(div);
+			}
+		}
+
+		*/
+
+		$("#background .level").append(container);
+	};
+
+
+	function initToon() {
+		$background.scrollLeft(0);
+		setToonImage(spriteStates.JUMPRIGHT);
+		setInterval(mainLoop, 1000/20); // 20 is decent
+		lastActionTime = new Date().getTime();
+		setInterval(checkIdle, 1000);
+	}
+	
+
+	function initAudio(levelNum) {
+		levelNum = levelNum || currentLevel;
+		window.AudioContext = window.AudioContext||window.webkitAudioContext;
+		game.audio.context = new AudioContext();
+
+		//load all of the bg music sounds for a level
+		var level = levels[levelNum];
+		
+		for (var t=0;t<level.themes.length;t++)
+		{
+			var theme = level.themes[t];
+			for	(var a=0;a<theme.audio.length;a++) {
+				var audio = theme.audio[a];
+				game.audio.loadSound((game.getLevelThemePath(levelNum, t) + audio.filename), game.audio.getAudioKey(audio.key, levelNum, t), audio.isLooping);
+			}
+		}
+	}
+
+
+
+	game.handleMouseDownEvent = function(e) {
+		if (!game.isEditMode)
+			return true;
+
+		// record the starting position for later
+		if (!mouse[e.which])
+			mouse[e.which] = {};
+	
+		mouse[e.which].xStart = e.pageX;
+		mouse[e.which].yStart = e.pageY;
+			
+		switch (e.which) {
+			case 1:
+				//alert('Left mouse button pressed');
+				break;
+			case 2:
+				//alert('Middle mouse button pressed');
+				break;
+			case 3:
+				//alert('Right mouse button pressed');
+
+				break;
+			default:
+				//alert('Unknown mouse button pressed:' + e.which);
+		}
+
+
+		// Using return false prevents browser's default,
+		// often unwanted mousemove actions (drag & drop)
+		return false;
+	};
+
+	game.handleMouseUpEvent = function(e) {
+		///user has let up on the mouse button - let's take action
+		if (!mouse[e.which])
+			mouse[e.which] = {};
+	
+		mouse[e.which].xEnd = e.pageX; //x/16 ~ cols
+		mouse[e.which].yEnd = e.pageY; //y/16 ~ rows
+
+		var rowsShowing = $(window).height()/16; //don't trunc the partial
+		var deadColMapRows = rowsShowing - game.collisionMaps[currentLevel].length; //amount of 'extra' rows showing above our collisionMap area of the level
+
+		//relative to the current screen scroll...so these start at 0,0 even if we are halfway through the level
+		var margin = 0; //margin makes single clicks miss when near the edge
+		relColStart = Math.floor((margin + mouse[e.which].xStart) / 16);
+		relRowStart = Math.floor((margin + mouse[e.which].yStart - (deadColMapRows*16)) / 16);
+		relColEnd = Math.floor((margin + mouse[e.which].xEnd) / 16);
+		relRowEnd = Math.floor((margin + mouse[e.which].yEnd - (deadColMapRows*16)) / 16);
+
+		var curScrollCol = Math.round(scrollPosX/16);
+
+		absColStart = curScrollCol + relColStart;
+		absRowStart = relRowStart;
+		absColEnd = curScrollCol + relColEnd;
+		absRowEnd = relRowEnd;
+		
+		var spritesWide = Math.max(1, Math.abs(absColEnd - absColStart));
+		var spritesTall = Math.max(1, Math.abs(absRowEnd - absRowStart));
+		
+		if (game.isEditMode) {
+
+			log('mouseup:all', mouse, ['pixels x/y,s/e:', mouse[e.which].xStart, mouse[e.which].xEnd, mouse[e.which].yStart, mouse[e.which].yEnd].toString(), ['rel r/c,s/e:', relRowStart, relRowEnd, relColStart, relColEnd].toString(), ['abs r/c,s/e:', absRowStart, absRowEnd, absColStart, absColEnd].toString(), e);
+
+			//log('mouseup', ['pixels', mouseStart_x, mouseStart_y, mouseEnd_x, mouseEnd_y, e]);
+			//log('mouseup', ['rel cols', relColStart, relRowStart, relColEnd, relRowEnd, e]);
+			//log('mouseup', ['abs cols', absColStart, absRowStart, absColEnd, absRowEnd, e]);
+
+
+			if (spritesWide > 0 && spritesTall > 0)
+			{
+				var value = e.which == 3 ? 0 : 1; //left click = add, right click = remove
+				var startCol = absColStart > absColEnd ? absColEnd : absColStart;
+				var startRow = absRowStart > absRowEnd ? absRowEnd : absRowStart;
+				var endCol = startCol + spritesWide;
+				var endRow = startRow + spritesTall;
+
+				log('selected', 'width:' + spritesWide, 'height:' + spritesTall, 'startRow/Col:' + startRow + ',' + startCol, 'end Row/Col:' + endRow + ',' + endCol);
+
+				if (startRow >= 0)
+				{
+					for (var r=startRow;r<endRow;r++)
+					{
+						for (var c=startCol;c<endCol;c++)
+						{
+							if (value == 1)
+							{	//increment the collision value, or cycle back through valid collidable values (>=1)
+								game.collisionMaps[currentLevel][r][c] = Math.max(1, (game.collisionMaps[currentLevel][r][c] + 1) % 3);
+							} else {
+								game.collisionMaps[currentLevel][r][c] = value;
+							} 
+						}
+					}
+				}
+
+			} else {
+				log('no selection', 'width', spritesWide, 'height', spritesTall, 'startRow: ' + startRow);
+			}
+
+			game.renderCollisionMap();
+		} else {
+			//not in debug mode...in presentation mode
+			
+			//right click...let's place the toon at the location clicked
+			if (e.which == 3)
+				game.setToonPosition(absColEnd, absRowEnd);
+			
+		}
+
+		// Using return false prevents browser's default,
+		// often unwanted mousemove actions (drag & drop)
+		return false;
+	};
+
+	
+
+	game.handleKeyDown = function(keyCode) {
+		//log(keyCode)
+		switch (keyCode) {
+			case 39: // right
+				game.moveToonRight();
+				break;
+			case 37: // left
+				game.moveToonLeft();
+				break;
+			case 38: // up
+				game.moveToonJump();
+				break;
+		}
+
+	};
+
+	game.handleKeyUp = function(keyCode) {
+		if (game.isEditMode)
+			log(keyCode);
+		
+		switch (keyCode) {
+			case 39: // right
+				game.stopToonIfMovingInDir(1);
+				break;
+			case 37: // left
+				game.stopToonIfMovingInDir(-1);
+				break;
+
+		}
+
+		keyQueue.push(keyCode);
+		while (keyQueue.length > keyQueueMax)
+			keyQueue.shift(); //remove the beginning
+
+		keyQueueString = keyQueue.toString();
+		if (keyQueueString.indexOf("38,38,40,40,37,39,37,39,66,65") >= 0)
+		{
+			//TODO konami code - up, up, down, down, left, right, left, right, b, a
+			
+			keyQueue = [];
+		} else if (keyQueueString.indexOf("56,66,73,84") >= 0) {
+			//8bit
+			game.changeTheme(1, true);
+			keyQueue = [];
+		} else if (keyQueueString.indexOf("49,54,66,73,84") >= 0) {
+			//16bit
+			game.changeTheme(1, true);
+			keyQueue = [];
+		} else if (keyQueueString.indexOf("77,65,82,73,79") >= 0) {
+			//mario
+			game.setToonSpriteSet(0);
+			keyQueue = [];
+		} else if (keyQueueString.indexOf("76,85,73,71,73") >= 0) {
+			//luigi
+			game.setToonSpriteSet(1);
+			keyQueue = [];
+		} else if (keyQueueString.indexOf("68,69,66,85,71,79,78") >= 0) {
+			//debugon
+			game.debugOn();
+			keyQueue = [];
+		} else if (keyQueueString.indexOf("68,69,66,85,71,79,70,70") >= 0) {
+			//debugoff
+			game.debugOff(1)
+			keyQueue = [];
+		}
+
+		if (game.isEditMode)
+			log(keyQueue.toString());
+	};
+
+
+
+	//EVENT WIREUP
+
+	$(document).keydown(function(e) {
+		game.handleKeyDown(e.which);
+	});
+
+	$(document).keyup(function(e) {
+		game.handleKeyUp(e.which);
+	});
+
+	$(window).bind("resize", function() {
+		$background.scrollLeft(scrollPosX);
+	});
+
+	$(window).bind("unload", function() {
+		game.saveChanges();
+	});
+
+	$level.bind("contextmenu",function(e) {
+		//game.handleMouseUpEvent(e); 
+		e.preventDefault();
+
+		// create and show menu
+		return true;
+	});
+
+	$level.mousedown(function(e) {
+		return game.handleMouseDownEvent(e);
+	});
+
+	$level.mouseup(function(e) {
+		return game.handleMouseUpEvent(e);
+	});
+
+	//END EVENT WIREUP
+
+
+
+
+	game.loadLevelBackground(currentLevel, currentThemeNum);
+	game.loadLevelBlockMap(currentLevel, currentThemeNum);
+	game.setToonPosition(levels[currentLevel].startPos);
+	game.setToonSpriteSet(1); //this chooses which toon sprite set we are using (mario/luigi/etc)
+	initToon();
+	initAudio(currentLevel);
+
+
+	if (game.isEditMode)
+		game.renderCollisionMap();
+	
+
+}); //end of private onload func
+
+
+
+
+</script>
+
+</html>
