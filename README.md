@@ -11,11 +11,11 @@ Presentations (with source in GitHub):
   - Startups Need Developers(to Add Value - Not Code)
     - presented at: RISE 2013
     - audience: business/dev pros
-    - http://www.aaronkmurray.com/RISE2013/
+    - http://www.aaronkmurray.com/SlideDecks/RISE2013/
   - Making and Losing Money in with a Start-Up Game Company
     - presented at: Captivate! 2013
     - audience: anyone interested in business/media/game companies
-    - http://www.aaronkmurray.com/Captivate2013/
+    - http://www.aaronkmurray.com/SlideDecks/Captivate2013/
 
 
 Other decks (informational only, no source in GitHub):
